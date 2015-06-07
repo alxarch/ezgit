@@ -1,6 +1,6 @@
 {
   "name": "ezgit",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A friendlier nodegit interface",
   "main": "lib/ezgit.js",
   "scripts": {
@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/alxarch/ezgit",
   "dependencies": {
+    "bluebird": "^2.9.27",
     "nodegit": "^0.4.1",
     "object-assign": "^3.0.0"
   },

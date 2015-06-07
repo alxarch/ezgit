@@ -4,8 +4,9 @@ assign = require "object-assign"
 {Transform, PassThrough} = require "stream"
 zlib = require "zlib"
 fs = require "fs"
-Promise = require "bluebird"
+Promise = g.Promise = require "bluebird"
 
+{INIT_FLAG, INIT_MODE} = g.Repository
 g.RepositoryInitOptions.fromObject = (options) ->
 	opt = assign {}, g.Repository.INIT_DEFAULTS, options
 	result = new g.RepositoryInitOptions()
@@ -92,9 +93,6 @@ g.Oid.fromAnything = (item) ->
 	else
 		g.Oid.ZERO
 
-assign g.Oid::,
-	toString: -> @tostrS()
-
 g.Repository.INIT_DEFAULTS = Object.freeze
 	bare: yes
 	reinit: yes
@@ -114,13 +112,13 @@ g.Repository.OPEN_DEFAULTS = Object.freeze
 g.Repository._open = g.Repository.open
 g.Repository.open = (path, options={}) ->
 	ceilings = ([].concat (options.ceilings or "")).join path.delimiter
-	options = assign {}, OPEN_DEFAULTS, options
+	options = assign {}, g.Repository.OPEN_DEFAULTS, options
 	flags = 0
 	unless options.search
 		flags |= @OPEN_FLAG.OPEN_NO_SEARCH
 	if options.bare
 		flags |= @OPEN_FLAG.OPEN_BARE
-	if option.crossfs
+	if options.crossfs
 		flags |= @OPEN_FLAG.OPEN_CROSS_FS
 
 	@openExt path, flags, ceilings
