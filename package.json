@@ -1,0 +1,31 @@
+{
+  "name": "ezgit",
+  "version": "0.0.1",
+  "description": "A friendlier nodegit interface",
+  "main": "lib/ezgit.js",
+  "scripts": {
+    "prepublish": "cake build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alxarch/ezgit"
+  },
+  "keywords": [
+    "libgit2",
+    "nodegit"
+  ],
+  "author": "Alexandros Sigalas <alxarch@gmail.com>",
+  "license": "Apache v2.0",
+  "bugs": {
+    "url": "https://github.com/alxarch/ezgit/issues"
+  },
+  "homepage": "https://github.com/alxarch/ezgit",
+  "dependencies": {
+    "nodegit": "^0.4.1",
+    "object-assign": "^3.0.0"
+  },
+  "devDependencies": {
+    "coffee-script": "^1.9.3"
+  }
+}
