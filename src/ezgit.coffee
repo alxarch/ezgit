@@ -150,7 +150,7 @@ assign g.Repository::,
 		@findRef options
 		.then (ref) => g.Commit.lookup @, ref.target()
 		.then (commit) -> commit.getEntry path
-		.then (entry) => g.Object.lookup @_repo, g.Oid.fromString(entry.sha()), g.Object.TYPE.ANY
+		.then (entry) => g.Object.lookup @, g.Oid.fromString(entry.sha()), g.Object.TYPE.ANY
 
 	createRef: (name, target, options={}) ->
 		oid = g.Oid.fromAnything target
