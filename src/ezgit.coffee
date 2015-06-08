@@ -129,13 +129,13 @@ assign g.Repository::,
 	findRef: (options="HEAD") ->
 		p =
 			if "string" is typeof options and g.Reference.isValidName options
-				@findRef options
+				@getReference options
 			else if options.ref and g.Reference.isValidName options.ref
-				@findRef options.ref
+				@getReference options.ref
 			else if options.tag
-				@findRef "refs/tags/#{options.tag}"
+				@getReference "refs/tags/#{options.tag}"
 			else if options.branch
-				@findRef "refs/heads/#{options.branch}"
+				@getReference "refs/heads/#{options.branch}"
 			else
 				@head()
 		p.then (ref) =>
