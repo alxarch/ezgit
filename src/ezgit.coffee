@@ -6,6 +6,11 @@ zlib = require "zlib"
 fs = require "fs"
 Promise = g.Promise = require "bluebird"
 
+Promise.stream = (str) ->
+	new Promise (resolve, reject) ->
+		str.on "error", reject
+		str.on "end", resolve
+
 {INIT_FLAG, INIT_MODE} = g.Repository
 g.RepositoryInitOptions.fromObject = (options) ->
 	opt = assign {}, g.Repository.INIT_DEFAULTS, options
@@ -47,14 +52,6 @@ g.RepositoryInitOptions.fromObject = (options) ->
 	result
 
 class GitObjectReadStream extends Transform
-	constructor: ->
-		super
-		stream = @
-		@promise = new Promise (resolve, reject) =>
-			@on "error", reject
-			@on "ready", (type, size) ->
-				stream.removeListener "error", reject
-				resolve {stream, type, size}
 
 	_transform: (chunk, encoding, callback) ->
 		unless @header
@@ -71,6 +68,7 @@ g.Commit::_oidMethod = "id"
 g.Blob::_oidMethod = "id"
 g.Note::_oidMethod = "id"
 g.OdbObject::_oidMethod = "id"
+g.Object::_oidMethod = "id"
 g.Tag::_oidMethod = "id"
 g.Tree::_oidMethod = "id"
 g.TreeEntry::_oidProperty = "oid"
@@ -165,30 +163,26 @@ assign g.Repository::,
 		sha = "#{oid}"
 		Promise.resolve path.join @path(), "objects", sha[0..1], sha[2..]
 		.then (loose) ->
-			gstr = new GitObjectReadStream()
-			fs.createReadStream loose
-			.pipe zlib.createUnzip()
-			.pipe gstr
-			gstr.promise
+			stream = new GitObjectReadStream()
+			zip = zlib.createUnzip()
+			read = fs.createReadStream loose
+			done = new Promise (resolve) ->
+				stream.on "ready", (type, size) -> resolve {type, size, stream}
+			read.pipe(zip).pipe(stream)
+			Promise.map [read, zip, stream], Promise.stream
+			.then -> done
 		.catch (err) =>
-			@odb()
-			.then (odb) ->
-				odb.read g.Oid.fromString oid
-				.then (obj) ->
-					stream = new PassThrough()
-					type = obj.type()
-					data = obj.data()
-					size = data.length
-					stream.end data
-					{stream, type, size}
+			g.Blob.lookup @, oid
+			.then (blob) ->
+				type: "blob"
+				size: blob.rawsize()
+				stream: blob.toReadableStream()
 
 assign g.Blob::,
-	getData: -> Promise.resolve @rawdata()
+	toReadableStream: ->
+		stream = new PassThrough()
+		stream.end @content()
+		stream
 
-assign g.Object::,
-	getData: ->
-		Promise.resolve @owner().odb()
-		.then (odb) => odb.read @id()
-		.then (obj) -> obd.data()
 
 module.exports = g
