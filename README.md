@@ -8,11 +8,9 @@ A friendlier nodegit interface
 
 ### Repository.open (path, options)
 
-### Repository#findByPath (path, options)
+### Repository#find (where)
 
 ### Repository#createReadStream (oid)
-
-### Repository#findRef (options)
 
 ### Repository#createRef (name, target, options)
 
@@ -21,6 +19,15 @@ A friendlier nodegit interface
 
 ### RepositoryInitOptions.fromObject (options)
 
+## Revparse
+
+### Revparse.toSpec (where)
+
+### Revparse.single (repo, where)
+
+## Revwalk
+
+### Revwalk#repo
 
 ## Oid
 

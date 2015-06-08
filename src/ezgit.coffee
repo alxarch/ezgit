@@ -1,4 +1,4 @@
-path = require "path"
+_path = require "path"
 g = require "nodegit"
 assign = require "object-assign"
 {Transform, PassThrough} = require "stream"
@@ -50,6 +50,7 @@ g.RepositoryInitOptions.fromObject = (options) ->
 		else
 			result.mode |= "#{result.mode}" | 0
 	result
+
 
 class GitObjectReadStream extends Transform
 
@@ -109,7 +110,7 @@ g.Repository.OPEN_DEFAULTS = Object.freeze
 	crossfs: no
 g.Repository._open = g.Repository.open
 g.Repository.open = (path, options={}) ->
-	ceilings = ([].concat (options.ceilings or "")).join path.delimiter
+	ceilings = ([].concat (options.ceilings or "")).join _path.delimiter
 	options = assign {}, g.Repository.OPEN_DEFAULTS, options
 	flags = 0
 	unless options.search
@@ -125,32 +126,43 @@ g.Repository._init = g.Repository.init
 g.Repository.init = (path, options={}) ->
 	Promise.resolve @initExt path, g.RepositoryInitOptions.fromObject options
 
-assign g.Repository::,
-	findRef: (options="HEAD") ->
-		p =
-			if "string" is typeof options and g.Reference.isValidName options
-				@getReference options
-			else if options.ref and g.Reference.isValidName options.ref
-				@getReference options.ref
-			else if options.tag
-				@getReference "refs/tags/#{options.tag}"
-			else if options.branch
-				@getReference "refs/heads/#{options.branch}"
+asrev = g.Revparse.toSpec = (value) ->
+	switch typeof value
+		when "string"
+			value
+		when "number"
+			"HEAD@{#{value | 0}}"
+		when "object"
+			if not value
+				"HEAD"
+			if value instanceof Date
+				"HEAD@{#{value.toISOString()}}"
 			else
-				@head()
-		p.then (ref) =>
-			if not ref.isSymbolic()
-				ref
-			else if options.symbolic
-				ref
-			else
-				@findRef ref.symbolicTarget()
+				{id, rev, tag, ref, branch, date, path, offset, search, upstream, type} = value
+				result = "#{id or rev or tag or ref or branch or 'HEAD'}"
+				if upstream and "#{branch}" is result
+					result = "#{branch}@{upstream}"
 
-	findByPath: (path, options={}) ->
-		@findRef options
-		.then (ref) => g.Commit.lookup @, ref.target()
-		.then (commit) -> commit.getEntry path
-		.then (entry) => g.Object.lookup @, g.Oid.fromString(entry.sha()), g.Object.TYPE.ANY
+				if offset
+					result = "#{result}@{#{offset | 0}}"
+
+				if date
+					result = "#{result}@{#{date}}"
+
+				if path
+					result = "#{result}:#{path.replace /^\/+/, ''}"
+				else if search
+					result= "#{result}:/#{search}"
+				else if type
+					result = "#{result}^{#{type}}"
+
+				result
+
+g.Revparse._single = g.Revparse.single
+g.Revparse.single = (repo, where) -> g.Revparse._single repo, @toSpec where
+
+assign g.Repository::,
+	find: (where) -> g.Revparse.single @, where
 
 	createRef: (name, target, options={}) ->
 		oid = g.Oid.fromAnything target
@@ -161,7 +173,7 @@ assign g.Repository::,
 	createReadStream: (item) ->
 		oid = g.Oid.fromAnything item
 		sha = "#{oid}"
-		Promise.resolve path.join @path(), "objects", sha[0..1], sha[2..]
+		Promise.resolve _path.join @path(), "objects", sha[0..1], sha[2..]
 		.then (loose) ->
 			stream = new GitObjectReadStream()
 			zip = zlib.createUnzip()
