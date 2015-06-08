@@ -184,5 +184,7 @@ assign g.Blob::,
 		stream.end @content()
 		stream
 
+Object.defineProperty g.Revwalk::, 'repo',
+	get: -> @repository()
 
 module.exports = g
