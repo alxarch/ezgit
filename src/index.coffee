@@ -1,0 +1,21 @@
+module.exports = g = require "nodegit"
+
+require "./#{m}" for m in [
+	"blob"
+	"commit"
+	"index-entry"
+	"index-time"
+	"object"
+	"odb-object"
+	"oid-array"
+	"oid"
+	"reference"
+	"repository-init-options"
+	"repository"
+	"revparse"
+	"signature"
+	"tag"
+	"time"
+	"tree-entry"
+	"tree"
+]

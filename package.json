@@ -1,10 +1,10 @@
 {
   "name": "ezgit",
-  "version": "0.0.4",
-  "description": "A friendlier nodegit interface",
-  "main": "lib/ezgit.js",
+  "version": "0.0.5",
+  "description": "API modifications for nodegit",
+  "main": "lib/index.js",
   "scripts": {
-    "prepublish": "cake build",
+    "prepublish": "rm -rf lib/ && ./node_modules/coffee-script/bin/coffee -o lib/ src/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -13,20 +13,20 @@
   },
   "keywords": [
     "libgit2",
+    "git",
     "nodegit"
   ],
   "author": "Alexandros Sigalas <alxarch@gmail.com>",
-  "license": "Apache v2.0",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/alxarch/ezgit/issues"
   },
   "homepage": "https://github.com/alxarch/ezgit",
   "dependencies": {
-    "bluebird": "^2.9.27",
-    "nodegit": "^0.4.1",
-    "object-assign": "^3.0.0"
+    "co": "^4.6.0",
+    "nodegit": "^0.12.2"
   },
   "devDependencies": {
-    "coffee-script": "^1.9.3"
+    "coffee-script": "^1.10.0"
   }
 }
